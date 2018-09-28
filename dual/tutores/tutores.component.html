@@ -1,0 +1,492 @@
+<div class="container-fluid">
+    <!-- Menu Principal !-->
+    <div>
+        <!-- Encabezado !-->
+        <div class="row">
+            <div class="col-lg-2">
+                <h2>
+                    {{titulo}}
+                    <button *ngIf="flag" type="button" class="btn btn-success" (click)="menu('nuevo')">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </button>
+                </h2>
+            </div>
+            <div class="col-lg-5">
+                <!-- Identificación!-->
+                <div class="form-group" *ngIf="!flag">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </span>
+                        <input type="text" class="form-control" id="identificacion" name="identificacion"
+                               placeholder="Ingrese identificación..." (keyup)="getExisteTutor()"
+                               [(ngModel)]="identificacion">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 offset-lg-2">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </span>
+                        <h6 class="form-control" *ngFor="let actual of periodoLectivoActual">
+                            {{actual.descripcion}}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div *ngIf="flag">
+            <div class="row">
+                <div class="col-lg-5 offset-lg-7">
+                    <div class="form-group">
+                        <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </span>
+                            <input type="text" class="form-control"
+                                   placeholder="Buscar por Apellido, Nombre o Identificación">
+                            <span class="btn input-group-addon" aria-hidden="true">&times;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top:15px">
+                <div class="col-lg-12">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th>
+                            </th>
+                            <th scope="col">
+                                Apellidos y Nombres
+                            </th>
+                            <th scope="col">
+                                Teléfono Celular
+                            </th>
+                            <th scope="col">
+                                Tipo
+                            </th>
+                            <th scope="col">
+                                Correo Electrónico
+                            </th>
+                            <th scope="col" class="text-center">
+                                <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- *ngFor es un metodo el cual nos permite proyectar la informacion en pantalla !-->
+                        <tr *ngFor="let actual of tutores" (click)="onSelect(actual)">
+                            <td>
+                                <i class="fa fa-hand-o-right" [hidden]="!estaSeleccionado(actual)"></i>
+                            </td>
+                            <td>
+                                {{actual.primerApellido}}
+                                {{actual.segundoApellido}}
+                                {{actual.primerNombre}}
+                                {{actual.segundoNombre}}
+                            </td>
+                            <td>{{actual.telefonoCelular}}</td>
+                            <td *ngIf="actual.tipoTutor == 'g'">
+                                GENERAL
+                            </td>
+                            <td *ngIf="actual.tipoTutor == 'e'">
+                                ESPECÍFICO
+                            </td>
+                            <td *ngIf="actual.tipoTutor == 'a'">
+                                ACADÉMICO
+                            </td>
+                            <td>{{actual.correoElectronicoInstitucional}}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" (click)="open(content,false)">
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="delete(actual)">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-12">
+                        <div class="btn-toolbar">
+                            <div>
+                                <button type="button" class="btn btn-default" (click)="getPaginaPrimera()">
+                                    <span class="fa fa-fast-backward"></span>
+                                </button>
+                                <button type="button" class="btn btn-default" (click)="getPaginaAnterior()">
+                                    <span class="fa fa-step-backward"></span>
+                                </button>
+                                <span>
+                                <strong style="margin:10px;">Página</strong>
+                                <strong id="paginaActual">{{paginaActual}}</strong>
+                                <strong style="margin:10px;">de</strong>
+                                <strong id="paginaUltima" style="margin-right:10px;">{{paginaUltima}}</strong>
+                            </span>
+                                <button type="button" class="btn btn-default" (click)="getPaginaSiguiente()">
+                                    <span class="fa fa-step-forward"></span>
+                                </button>
+                                <button type="button" class="btn btn-default" (click)="getPaginaUltima()">
+                                    <span class="fa fa-fast-forward"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Nuevo Asignacion de Estudiantes a Entidades Formadoras !-->
+    <div class="row" *ngIf="!flagTutorNuevo">
+        <div class="col-lg-1">
+            <button *ngIf="!flag" type="button" class="btn btn-secondary" (click)="menu('regresar')">
+                <i class="fa fa-arrow-circle-left"></i>&nbsp;Regresar
+            </button>
+        </div>
+    </div>
+    <div *ngIf="!flag">
+        <div class="row" *ngIf="flagTutorNuevo">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <!-- Primer nombre !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-address-card" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="nombre1" name="nombre1"
+                                       placeholder="Primer Nombre" [(ngModel)]="tutorFiltrado.primerNombre">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Segundo nombre !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-address-card" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="nombre2" name="nombre2"
+                                       placeholder="Segundo Nombre" [(ngModel)]="tutorFiltrado.segundoNombre">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Primer Apellido !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-address-card" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="apellido1" name="apellido1"
+                                       placeholder="Primer Apellido" [(ngModel)]="tutorFiltrado.primerApellido">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Segundo Apellido !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-address-card" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="apellido2" name="apellido2"
+                                       placeholder="Segundo Apellido" [(ngModel)]="tutorFiltrado.segundoApellido">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Fecha Nacimiento !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                                <input class="form-control-sm" type="date" name="fechaNacimiento" id="fechaInicio"
+                                       [(ngModel)]="tutorFiltrado.fechaNacimiento"/>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <!-- Telefono Celular !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-mobile" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="telefonoCelular" name="telefonoCelular"
+                                       placeholder="Telefono Celular" [(ngModel)]="tutorFiltrado.telefonoCelular">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Telefono Domicilio !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-phone-square" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" id="telefonoDomicilio" name="telefonoDomicilio"
+                                       placeholder="Telefono Domicilio"
+                                       [(ngModel)]="tutorFiltrado.telefonoDomicilio">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Correo Institucional !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                                </span>
+                                <input type="email" class="form-control" id="correoElectronicoInstitucional"
+                                       name="correoElectronicoInstitucional"
+                                       placeholder="Correo Institucional"
+                                       [(ngModel)]="tutorFiltrado.correoElectronicoInstitucional">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Correo Personal !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                </span>
+                                <input type="email" class="form-control" id="correoElectronicoPersonal"
+                                       name="correoElectronicoPersonal"
+                                       placeholder="Correo Personal"
+                                       [(ngModel)]="tutorFiltrado.correoElectronicoPersonal">
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- tipo tutor!-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-users" aria-hidden="true"></i>
+                                </span>
+                                <select class="form-control" name="tipoTutor" id="tipoTutor"
+                                        [(ngModel)]="tutorFiltrado.tipoTutor">
+                                    <option value="0">
+                                        Seleccione Tipo de Tutor
+                                    </option>
+                                    <option value="a">
+                                        Académico
+                                    </option>
+                                    <option value="g">
+                                        General
+                                    </option>
+                                    <option value="e">
+                                        Espécifico
+                                    </option>
+                                </select>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                                <span class="input-group-addon">
+                                    <i class="fa fa-intersex" aria-hidden="true"></i>
+                                </span>
+                                <select class="form-control" name="idGenero" id="idGenero"
+                                        [(ngModel)]="tutorFiltrado.idGenero">
+                                    <option value="0">
+                                        Seleccione Género
+                                    </option>
+                                    <option value="1">
+                                        Masculino
+                                    </option>
+                                    <option value="2">
+                                        Femenino
+                                    </option>
+                                    <option value="3">
+                                        Sin Especificar
+                                    </option>
+                                </select>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <button type="button" class="btn btn-primary" (click)="create(tutorFiltrado)">
+                            <i class="fa fa-save"></i>&nbsp;Guardar
+                        </button>
+                        <button type="button" class="btn btn-success" (click)="menu('regresar')">
+                            <i class="fa fa-sign-out"></i>&nbsp;Finalizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editar Asignacion de Estudiantes a Entidades Formadoras !-->
+    <ng-template #content let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Edición de Datos:
+
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- primer nombre !-->
+                    <div class="form-group row">
+                        <label for="editPrimerNombre" class="col-lg-4 col-form-label">
+                            Primer Nombre:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editPrimerNombre" id="editPrimerNombre"
+                                   [(ngModel)]="entidadSeleccionada.primerNombre">
+                        </div>
+                    </div>
+                    <!-- segundo nombre !-->
+                    <div class="form-group row">
+                        <label for="editSegundoNombre" class="col-lg-4 col-form-label">
+                            Segundo Nombre:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editSegundoNombre" id="editSegundoNombre"
+                                   [(ngModel)]="entidadSeleccionada.segundoNombre">
+                        </div>
+                    </div>
+                    <!-- Primer Apellido !-->
+                    <div class="form-group row">
+                        <label for="editPrimerApellido" class="col-lg-4 col-form-label">
+                            Primer Apellido:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editPrimerApellido" id="editPrimerApellido"
+                                   [(ngModel)]="entidadSeleccionada.primerApellido">
+                        </div>
+                    </div>
+                    <!-- Segundo Apellido !-->
+                    <div class="form-group row">
+                        <label for="editSegundoApellido" class="col-lg-4 col-form-label">
+                            Segundo Apellido:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editSegundoApellido" id="editSegundoApellido"
+                                   [(ngModel)]="entidadSeleccionada.segundoApellido">
+                        </div>
+                    </div>
+                    <!-- Fecha Nacimiento !-->
+                    <div class="form-group row">
+                        <label for="editFechaNacimiento" class="col-lg-4 col-form-label">
+                            Fecha Nacimiento:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="date" name="editFechaNacimiento"
+                                   id="editFechaNacimiento" [(ngModel)]="entidadSeleccionada.fechaNacimiento"
+                            />
+                        </div>
+                    </div>
+                    <!-- Correo Institucional !-->
+                    <div class="form-group row">
+                        <label for="editCorreoElectronicoInstitucional" class="col-lg-4 col-form-label">
+                            Correo Electronico Institucional:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editCorreoElectronicoInstitucional"
+                                   id="editCorreoElectronicoInstitucional"
+                                   [(ngModel)]="entidadSeleccionada.correoElectronicoInstitucional">
+                        </div>
+                    </div>
+                    <!-- Correo Personal !-->
+                    <div class="form-group row">
+                        <label for="editCorreoElectronicoPersonal" class="col-lg-4 col-form-label">
+                            Correo Electrónico Personal:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editCorreoElectronicoPersonal"
+                                   id="editCorreoElectronicoPersonal"
+                                   [(ngModel)]="entidadSeleccionada.correoElectronicoPersonal">
+                        </div>
+                    </div>
+                    <!-- Telefono Celular !-->
+                    <div class="form-group row">
+                        <label for="editTelefonoCelular" class="col-lg-4 col-form-label">
+                            Teléfono Celular:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" name="editTelefonoCelular" id="editTelefonoCelular"
+                                   [(ngModel)]="entidadSeleccionada.telefonoCelular">
+                        </div>
+                    </div>
+                    <!-- Genero!-->
+                    <div class="form-group row">
+                        <label for="editIdGenero" class="col-lg-4 col-form-label">
+                            Género:
+                        </label>
+                        <div class="col-lg-8">
+                            <select class="form-control" name="editIdGenero" id="editIdGenero"
+                                    [(ngModel)]="entidadSeleccionada.idGenero">
+                                <option value="1">
+                                    Masculino
+                                </option>
+                                <option value="2">
+                                    Femenino
+                                </option>
+                                <option value="3">
+                                    Sin Especificar
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <!--Tipo de Tutor!-->
+                    <div class="form-group row">
+                        <label for="editTipoTutor" class="col-lg-4 col-form-label">
+                            Tipo Tutor:
+                        </label>
+                        <div class="col-lg-8">
+                            <select class="form-control" name="editTipoTutor" id="editTipoTutor"
+                                    [(ngModel)]="entidadSeleccionada.tipoTutor">
+                                <option value="a">
+                                    Académico
+                                </option>
+                                <option value="g">
+                                    General
+                                </option>
+                                <option value="e">
+                                    Específico
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary col-offset-sm-4" (click)="c('save')">
+                <span class="fa fa-save"></span>&nbsp;Guardar
+            </button>
+            <button type="button" class="btn btn-danger" (click)="c('close')">
+                <i class="fa fa-window-close" aria-hidden="true"></i>
+                Cerrar
+            </button>
+        </div>
+    </ng-template>
+</div>

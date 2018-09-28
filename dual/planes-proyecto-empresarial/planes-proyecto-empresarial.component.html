@@ -1,0 +1,665 @@
+<div class="container-fluid">
+    <!-- Encabezado !-->
+    <div class="row">
+        <div class="col-lg-9">
+            <h2>Planes Proyecto Empresarial:
+                <button *ngIf="flag" type="button" class="btn btn-success" (click)="menu('nuevo')">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+            </h2>
+        </div>
+        <div class="col-lg-3">
+            <div class="form-group">
+                <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                    <h6 class="form-control" *ngFor="let actual of periodoLectivoActual">
+                        {{actual.descripcion}}
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SubMenu !-->
+    <div *ngIf="flag">
+        <hr>
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="1%">
+                        </th>
+                        <th width="30%" scope="col">
+                            Estudiantes
+                        </th>
+                        <th width="55%" scope="col">
+                            Proyectos
+                        </th>
+                        <th width="15%" scope="col" class="text-center">
+                            <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let actual of planesProyectoEmpresarial" (click)="onSelect(actual)">
+                        <td>
+                            <i class="fa fa-hand-o-right" [hidden]="!estaSeleccionado(actual)"></i>
+                        </td>
+                        <td>{{actual.apellido1}} {{actual.apellido2}} {{actual.nombre1}} {{actual.nombre2}}
+                        </td>
+                        <td>
+                            <textarea class="form-control" readonly>{{actual.titulo}}</textarea>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" (click)="open(content,false)"
+                                    *ngIf="actual.prioridad==0">
+                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" (click)="delete(actual)"
+                                    *ngIf="actual.prioridad==0">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-info btn-sm" (click)="generarPDFPlanProyectoEmpresarial()"
+                                    *ngIf="actual.prioridad == 1">
+                                <i class="fa fa-print" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm" (click)="bloquearPlanProyectoEmpresarial()"
+                                    *ngIf="actual.prioridad == 0">
+                                <i class="fa fa-check-square" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="col-md-12">
+                    <div class="btn-toolbar">
+                        <div>
+                            <button type="button" class="btn btn-default" (click)="getPaginaPrimera()">
+                                <span class="fa fa-fast-backward"></span>
+                            </button>
+                            <button type="button" class="btn btn-default" (click)="getPaginaAnterior()">
+                                <span class="fa fa-step-backward"></span>
+                            </button>
+                            <span><strong style="margin:10px;">Página</strong><strong
+                                id="paginaActual">{{paginaActual}}</strong><strong
+                                style="margin:10px;">de</strong><strong
+                                id="paginaUltima" style="margin-right:10px;">{{paginaUltima}}</strong></span>
+                            <button type="button" class="btn btn-default" (click)="getPaginaSiguiente()">
+                                <span class="fa fa-step-forward"></span>
+                            </button>
+                            <button type="button" class="btn btn-default" (click)="getPaginaUltima()">
+                                <span class="fa fa-fast-forward"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Nuevo Plan Proyecto Empresarial !-->
+    <div *ngIf="!flag">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <!-- Estudiante !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-address-card" aria-hidden="true"></i>
+                            </span>
+                                <select class="form-control" name="editEstudiante" id="estudiante"
+                                        [(ngModel)]="entidadSeleccionada.idEstudiante">
+                                    <option value="0" selected>
+                                        Seleccione Estudiante
+                                    </option>
+                                    <option *ngFor="let estudiante of estudiantes"
+                                            value="{{estudiante.idEstudiante}}">
+                                        {{estudiante.primerApellido}}{{estudiante.segundoApellido}}
+                                        {{estudiante.primerNombre}}{{estudiante.segundoNombre}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <!-- Titulo !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-tag" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="titulo" id="titulo"
+                                          [(ngModel)]="entidadSeleccionada.titulo"
+                                          placeholder="Titulo">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Analisis !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-tasks" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="analisis" id="analisis"
+                                          [(ngModel)]="entidadSeleccionada.analisis"
+                                          placeholder="Analisis">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Objetivo !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-certificate" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="objetivo" id="objetivo"
+                                          [(ngModel)]="entidadSeleccionada.objetivo"
+                                          placeholder="Objetivo">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Descripcion !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-sitemap" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="descripcion" id="descripcion"
+                                          [(ngModel)]="entidadSeleccionada.descripcion"
+                                          placeholder="Descripcion">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Indicador !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-star" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="indicador" id="indicador"
+                                          [(ngModel)]="entidadSeleccionada.indicador"
+                                          placeholder="Indicador">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <!-- Medicion !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-balance-scale" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="medicion" id="medicion"
+                                          [(ngModel)]="entidadSeleccionada.medicion"
+                                          placeholder="Medicion">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Meta !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-trophy" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="meta" id="meta"
+                                          [(ngModel)]="entidadSeleccionada.meta"
+                                          placeholder="Meta">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Fuente Datos !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-database" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="fuenteDatos" id="fuenteDatos"
+                                          [(ngModel)]="entidadSeleccionada.fuenteDatos"
+                                          placeholder="Fuente de Datos">>
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Beneficios Esperados !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-handshake-o" aria-hidden="true"></i>
+                            </span>
+                                <textarea class="form-control" name="beneficiosEsperados" id="beneficiosEsperados"
+                                          [(ngModel)]="entidadSeleccionada.beneficiosEsperados"
+                                          placeholder="Beneficios Esperados">
+                                </textarea>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+
+                        <!-- Presupuesto !-->
+                        <div class="form-group">
+                            <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-money" aria-hidden="true"></i>
+                            </span>
+                                <input type="number" min="1" class="form-control" name="presupuesto" id="presupuesto"
+                                       [(ngModel)]="entidadSeleccionada.presupuesto"
+                                       placeholder="Presupuesto"/>
+                                <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <button type="button" class="btn btn-primary" (click)="create(entidadSeleccionada)">
+                            <i class="fa fa-save"></i>&nbsp;Guardar
+                        </button>
+                        <button type="button" class="btn btn-success" (click)="menu('regresar')">
+                            <i class="fa fa-sign-out"></i>&nbsp;Finalizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editar Plan Proyecto Empresarial !-->
+    <ng-template #content let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Edición de Datos:
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Estudiante !-->
+                    <div class="form-group row">
+                        <label for="estudiante" class="col-lg-4 col-form-label">Estudiante: </label>
+                        <input type="text" id="editIdEstudiante" name="editIdEstudiante" hidden
+                               [(ngModel)]="entidadSeleccionada.idEstudiante">
+                        <div class="col-lg-8">
+                            <input type="text" readonly class="form-control" id="editEstudiante"
+                                   name="editEstudiante"
+                                   [(ngModel)]="entidadSeleccionada.apellido1 + ' ' +
+                                                entidadSeleccionada.apellido2 + ' ' +
+                                                entidadSeleccionada.nombre1 + ' ' +
+                                                entidadSeleccionada.nombre2">
+                        </div>
+                    </div>
+
+                    <!-- Titulo !-->
+                    <div class="form-group row">
+                        <label for="editTitulo" class="col-lg-4 col-form-label">
+                            Título:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editTitulo" id="editTitulo"
+                                      [(ngModel)]="entidadSeleccionada.titulo">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Analisis !-->
+                    <div class="form-group row">
+                        <label for="editAnalisis" class="col-lg-4 col-form-label">
+                            Análisis:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editAnalisis"
+                                      id="editAnalisis"
+                                      [(ngModel)]="entidadSeleccionada.analisis">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Objetivo !-->
+                    <div class="form-group row">
+                        <label for="editObjetivo" class="col-lg-4 col-form-label">
+                            Objetivo:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editNombreTutorGeneral"
+                                      id="editObjetivo"
+                                      [(ngModel)]="entidadSeleccionada.objetivo">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Descripcion !-->
+                    <div class="form-group row">
+                        <label for="editDescripcion" class="col-lg-4 col-form-label">
+                            Descripción:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editDescripcion"
+                                      id="editDescripcion"
+                                      [(ngModel)]="entidadSeleccionada.descripcion">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Descripcion Indicador !-->
+                    <div class="form-group row">
+                        <label for="editIndicador" class="col-lg-4 col-form-label">
+                            Indicador:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editIndicador"
+                                      id="editIndicador"
+                                      [(ngModel)]="entidadSeleccionada.indicador">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Medicion !-->
+                    <div class="form-group row">
+                        <div class="col-lg-4 col-form-label">
+                            <label for="editMedicion">
+                                Medición:
+                            </label>
+                        </div>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editMedicion" id="editMedicion"
+                                      [(ngModel)]="entidadSeleccionada.medicion">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Meta !-->
+                    <div class="form-group row">
+                        <label for="editMeta" class="col-lg-4 col-form-label">
+                            Meta:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editMeta" id="editMeta"
+                                      [(ngModel)]="entidadSeleccionada.meta">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Fuente Datos !-->
+                    <div class="form-group row">
+                        <label for="editFuenteDatos" class="col-lg-4 col-form-label">
+                            Fuente Datos:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editFuenteDatos" id="editFuenteDatos"
+                                      [(ngModel)]="entidadSeleccionada.fuenteDatos">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Beneficios Esperados !-->
+                    <div class="form-group row">
+                        <label for="editBenificiosEsperados" class="col-lg-4 col-form-label">
+                            Beneficios esperados:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" type="number" min="1" name="editBenificiosEsperados"
+                                      id="editBenificiosEsperados"
+                                      [(ngModel)]="entidadSeleccionada.beneficiosEsperados">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Presupuesto !-->
+                    <div class="form-group row">
+                        <label for="editPresupuesto" class="col-lg-4 col-form-label">
+                            Presupuesto:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="number" min="1" name="editPresupuesto"
+                                   id="editPresupuesto" [(ngModel)]="entidadSeleccionada.presupuesto"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary col-offset-sm-4" (click)="c('save')">
+                <span class="fa fa-save"></span>&nbsp;Guardar
+            </button>
+            <button type="button" class="btn btn-default" (click)="c('close')">Cerrar</button>
+        </div>
+    </ng-template>
+</div>
+<button (click)="generarPDFPlanProyectoEmpresarial()">Generar PDF</button>
+<div *ngIf="false" class="container-fluid">
+    <div #encabezadoPlanProyectoEmpresarial>
+        <div class="row">
+            <div class="col-lg-12">
+                <img src='../../../../assets/images/logos/benito_juarez.jpg' alt=""/>
+            </div>
+        </div>
+    </div>
+    <div #cuerpoPlanProyectoEmpresarial>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Plan Proyecto Empresarial</h1>
+                <div *ngFor="let actual of planesProyectoEmpresarial">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>
+                                Estudiante:
+                            </td>
+                            <td>
+                                {{actual.apellido1}} {{actual.apellido2}}
+                                {{actual.nombre1}} {{actual.nombre2}}
+                            </td>
+                            <td>
+                                Periodo Lectivo:
+                            </td>
+                            <td>
+                                Mayo 2018 - Octubre 2018
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Carrera:
+                            </td>
+                            <td>
+                                Tecnólogo Superior en Desarrollo de Software
+                            </td>
+                            <td>
+                                Periodo Académico:
+                            </td>
+                            <td>
+                                Primero
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Entidad Formadora:
+                            </td>
+                            <td>
+                                Cineto
+                            </td>
+                            <td>Horas de Formación</td>
+                            <td>360 Horas</td>
+                        </tr>
+                    </table>
+                </div>
+                <div *ngFor="let actual of planesProyectoEmpresarial">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>
+                                Título del Proyecto:
+                            </td>
+                            <td>
+                                {{actual.titulo}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                Análisis:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                {{actual.analisis}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                Objetivo:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                {{actual.objetivo}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                Descripción:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                {{actual.descripcion}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Indicador:
+                            </td>
+                            <td>
+                                Medición:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{actual.indicador}}
+                            </td>
+                            <td>
+                                {{actual.medicion}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Meta:
+                            </td>
+                            <td>
+                                Fuente de Datos:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{actual.meta}}
+                            </td>
+                            <td>
+                                {{actual.fuenteDatos}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Presupuesto:
+                            </td>
+                            <td>
+                                Beneficios Esperados:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{actual.presupuesto}}
+                            </td>
+                            <td>
+                                {{actual.beneficiosEsperados}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                            Coordinador de la Carrera:
+                        </td>
+                        <td>
+                            Estudiante
+                        </td>
+                        <td>
+                            Tutor General
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Nombres:
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Firmas:
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                        <td>
+                            __________________________
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div #piePlanProyectoEmpresarial>
+        <img src='../../../../assets/images/logos/benito_juarez.jpg' alt=""/>
+    </div>
+</div>

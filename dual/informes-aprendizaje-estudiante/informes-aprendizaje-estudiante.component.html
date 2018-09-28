@@ -1,0 +1,327 @@
+<div class="container-fluid">
+    <!-- Encabezado !-->
+    <div class="row">
+        <div class="col-lg-9">
+            <h2>
+                {{titulo}}
+                <button type="button" class="btn btn-success"
+                        *ngIf="flag"
+                        (click)="cambiarFlag('nuevo'); cambiarFlagNuevaActividad(true); getNumeroUltimaSemana()">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-secondary"
+                        *ngIf="!flag" (click)="cambiarFlag('regresar')">
+                    <span class="fa fa-arrow-circle-left"></span>&nbsp;Regresar
+                </button>
+            </h2>
+        </div>
+        <!-- Periodo Lectivo !-->
+        <div class="col-lg-3">
+            <div class="form-group">
+                <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                    <h6 class="form-control" *ngFor="let actual of periodoLectivoActual">
+                        {{actual.descripcion}}
+                    </h6>
+                </div>
+            </div>
+        </div>
+        <hr>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            <div *ngIf="!flag" class="form-group">
+                <div class="input-group">
+                    <label for="numeroUltimaSemana" class="form-control">
+                        Semana:
+                    </label>
+                    <input *ngIf="flagNuevaActividad==true"
+                           type="number" id="numeroUltimaSemana" class="form-control"
+                           min="1" max="20" [(ngModel)]="numeroUltimaSemana">
+                    <input *ngIf="flagNuevaActividad==false" type="number" id="numeroUltimaSemana2" class="form-control"
+                           [(ngModel)]="numeroUltimaSemana" disabled>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8"></div>
+        <!-- Botones para finalizar y generar reporte !-->
+        <div class="col-lg-2">
+            <!-- Boton para generar reporte !-->
+            <button class="btn btn-primary pull-right form-control"
+                    *ngIf="(informesAprendizajeTemporal.estado==1 || informesAprendizajeTemporal.estado==2
+                    || informesAprendizajeTemporal.estado==3) && flag==false"
+                    (click)="bloquearInformeAprendizae()">
+                <i class="fa fa-print" aria-hidden="true"></i>
+                Generar Plan
+            </button>
+            <!-- Boton para bloquear el Informe de Aprendizaje !-->
+            <button class="btn btn-success pull-right form-control"
+                    *ngIf="informesAprendizajeTemporal.estado==0 && flag==false && actividadesInformeAprendizaje != null"
+                    (click)="bloquearInformeAprendizae()">
+                <i class="fa fa-check-square" aria-hidden="true"></i>
+                Enviar Informe
+            </button>
+        </div>
+    </div>
+    <!-- Grid Infomes de Aprendizaje!-->
+    <div *ngIf="flag">
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="1%">
+                        </th>
+                        <th width="5%" scope="col">
+                            Semana
+                        </th>
+                        <th width="5%" scope="col">
+                            Calificación
+                        </th>
+                        <th width="40%" scope="col">
+                            Reflexión
+                        </th>
+                        <th width="40%" scope="col">
+                            Observaciones
+                        </th>
+                        <th width="10%" scope="col" class="text-center">
+                            <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Para mostrar las actividades creadas !-->
+                    <tr *ngFor="let actual of informesAprendizaje" (click)="onSelect(actual)">
+                        <td>
+                            <i class="fa fa-hand-o-right" [hidden]="!estaSeleccionado(actual)"></i>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" value="{{actual.semana}}" readonly/>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.prioridad != 0 && actual.prioridad != -1;
+                                then mostrarCalificacion else ocultarCalificacion"></div>
+                            <ng-template #mostrarCalificacion>
+                                <input type="number" min="0" max="100" [(ngModel)]="actual.calificacion"
+                                       class="form-control" readonly/>
+                            </ng-template>
+                            <ng-template #ocultarCalificacion>
+                                <textarea class="form-control" readonly>Sin Calificar</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div
+                                *ngIf="actual.prioridad != 0 && actual.prioridad != -1;
+                                then mostrarReflexion else bloquearReflexion"></div>
+                            <ng-template #mostrarReflexion>
+                                <textarea [(ngModel)]="actual.reflexion" class="form-control" readonly></textarea>
+                            </ng-template>
+                            <ng-template #bloquearReflexion>
+                            <textarea class="form-control" readonly
+                                      *ngIf="actual.prioridad == -1">Enviado para Calificar</textarea>
+                                <textarea class="form-control" readonly
+                                          *ngIf="actual.prioridad == 0">Informe de Aprendizaje NO enviado al Tutor</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div
+                                *ngIf="actual.prioridad != 0 && actual.prioridad != -1;
+                                then mostrarObservaciones else bloquearObservaciones"></div>
+                            <ng-template #mostrarObservaciones>
+                                    <textarea type="text" [(ngModel)]="actual.observaciones" readonly
+                                              class="form-control"></textarea>
+                            </ng-template>
+                            <ng-template #bloquearObservaciones>
+                                <textarea class="form-control" readonly
+                                          *ngIf="actual.prioridad == -1">Enviado para Calificar</textarea>
+                                <textarea class="form-control" readonly
+                                          *ngIf="actual.prioridad == 0">Informe de Aprendizaje NO enviado al Tutor</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.prioridad == 0;
+                                then mostrarBotonActualizar else ocultarBotonActualizar"></div>
+                            <ng-template #mostrarBotonActualizar>
+                                <button class="btn btn-info btn-sm"
+                                        *ngIf="actual.prioridad == -1"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);
+                                        cambiarFlagNuevaActividad(false);cambiarFlag('ver');">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm"
+                                        *ngIf="actual.prioridad == 0"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);
+                                        cambiarFlagNuevaActividad(false);cambiarFlag('actualizar');">
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm"
+                                        (click)="borrarInformeAprendizaje(actual)">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                            </ng-template>
+                            <ng-template #ocultarBotonActualizar>
+                                <button class="btn btn-info btn-sm"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);
+                                        cambiarFlagNuevaActividad(false);cambiarFlag('ver')">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button *ngIf="actual.prioridad == 1" class="btn btn-danger btn-sm" disabled>
+                                    <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                </button>
+                                <button *ngIf="actual.prioridad == 2" class="btn btn-warning btn-sm" disabled>
+                                    <i class="fa fa-handshake-o" aria-hidden="true"></i>
+                                </button>
+                                <button *ngIf="actual.prioridad == 3" class="btn btn-primary btn-sm" disabled>
+                                    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                                </button>
+                            </ng-template>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Grid Activiades !-->
+    <div *ngIf="!flag">
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="1%">
+                        </th>
+                        <th width="55%" scope="col">
+                            Actividades
+                        </th>
+                        <th width="5%" scope="col">
+                            fecha
+                        </th>
+                        <th width="10%" scope="col">
+                            Hora Ingreso
+                        </th>
+                        <th width="10%" scope="col">
+                            Hora Salida
+                        </th>
+                        <th width="5%" scope="col">
+                            Horas Totales
+                        </th>
+                        <th width="10%" scope="col" class="text-center">
+                            <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Para ingresar la nueva actividad !-->
+                    <tr *ngIf="estadoInformeActividad == 0 || estadoInformeActividad == undefined">
+                        <td>
+                        </td>
+                        <td>
+                            <textarea class="form-control" [(ngModel)]="entidadSeleccionada.descripcion"
+                                      placeholder="Ingrese la nueva actividad"></textarea>
+                        </td>
+                        <td>
+                            <input type="date" class="form-control" [(ngModel)]="entidadSeleccionada.fecha"/>
+                        </td>
+                        <td>
+                            <input type="time" class="form-control" [(ngModel)]="entidadSeleccionada.horaIngreso"/>
+                        </td>
+                        <td>
+                            <input type="time" class="form-control" [(ngModel)]="entidadSeleccionada.horaSalida"/>
+                        </td>
+                        <td>
+                            <input type="number" min="1" max="24" class="form-control"
+                                   [(ngModel)]="entidadSeleccionada.horasTotales"/>
+                        </td>
+                        <td>
+                            <button *ngIf="flagNuevaActividad" class="btn btn-primary btn-sm"
+                                    (click)="guardarNuevaActividad(entidadSeleccionada);cambiarFlag('guardar')">
+                                <i class="fa fa-save fa-2x" aria-hidden="true"></i>
+                            </button>
+
+                            <button *ngIf="!flagNuevaActividad" class="btn btn-danger btn-sm"
+                                    (click)="guardarActividad(entidadSeleccionada);cambiarFlag('guardar')">
+                                <i class="fa fa-save fa-2x" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Para mostrar las actividades creadas !-->
+                    <tr *ngFor="let actual of actividadesInformeAprendizaje" class="table-active">
+                        <td>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado == 0;
+                                then mostrarDescripcion else ocultarDescripcion"></div>
+                            <ng-template #mostrarDescripcion>
+                                <textarea [(ngModel)]="actual.descripcion" class="form-control"></textarea>
+                            </ng-template>
+                            <ng-template #ocultarDescripcion>
+                                <textarea class="form-control" readonly>{{actual.descripcion}}</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado == 0;
+                                then mostrarFecha else ocultarFecha"></div>
+                            <ng-template #mostrarFecha>
+                                <input type="date" [(ngModel)]="actual.fecha"
+                                       class="form-control"/>
+                            </ng-template>
+                            <ng-template #ocultarFecha>
+                                <input type="date" class="form-control" readonly value="{{actual.fecha}}"/>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado==0;
+                                then mostrarHoraIngreso else bloquearHoraIngreso"></div>
+                            <ng-template #mostrarHoraIngreso>
+                                <input type="time" [(ngModel)]="actual.horaIngreso" class="form-control"/>
+                            </ng-template>
+                            <ng-template #bloquearHoraIngreso>
+                                <input type="time" class="form-control" readonly value="{{actual.horaIngreso}}">
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado == 0;
+                                then mostrarHoraSalida else bloquearHoraSalida"></div>
+                            <ng-template #mostrarHoraSalida>
+                                <input type="time" [(ngModel)]="actual.horaSalida" class="form-control"/>
+                            </ng-template>
+                            <ng-template #bloquearHoraSalida>
+                                <input type="time" class="form-control" readonly value="{{actual.horaSalida}}">
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div
+                                *ngIf="actual.estado == 0;
+                                then mostrarHorasTotales else bloquearHorasTotales"></div>
+                            <ng-template #mostrarHorasTotales>
+                                <input type="number" min="1" max="24" [(ngModel)]="actual.horasTotales"
+                                       class="form-control"/>
+                            </ng-template>
+                            <ng-template #bloquearHorasTotales>
+                                <input type="number" class="form-control" readonly value="{{actual.horasTotales}}"/>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado == 0;
+                                then mostrarBotones else bloquearBotones"></div>
+                            <ng-template #mostrarBotones>
+                                <button class="btn btn-primary btn-sm"
+                                        (click)="actualizarActividad(actual)">
+                                    <i class="fa fa-save" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm"
+                                        (click)="borrarActividad(actual)">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </ng-template>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

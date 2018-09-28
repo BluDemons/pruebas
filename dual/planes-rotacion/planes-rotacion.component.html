@@ -1,0 +1,251 @@
+<div class="container-fluid">
+    <!-- Menu Principal !-->
+    <div>
+        <!-- Encabezado !-->
+        <div class="row">
+            <!-- Titulo !-->
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <h2>Plan de Rotación:</h2>
+                </div>
+            </div>
+            <!-- Seleccion Estudiante !-->
+            <div class="col-lg-5">
+                <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </span>
+                    <select class="form-control" name="editEstudiante" id="editEstudiante"
+                            [(ngModel)]="entidadSeleccionada.idEstudiante"
+                            (click)="getPlanRotacionPorEstudiante(entidadSeleccionada.idEstudiante)">
+                        <option value="0">
+                            Seleccione Estudiante
+                        </option>
+                        <option *ngFor="let estudiante of estudiantes"
+                                value="{{estudiante.idEstudiante}}">
+                            {{estudiante.primerApellido}} {{estudiante.segundoApellido}}
+                            {{estudiante.primerNombre}} {{estudiante.segundoNombre}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <!-- Columna en blanco !-->
+            <div class="col-lg-1"></div>
+            <!-- Periodo Lectivo !-->
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <div class="input-group">
+                                            <span class="input-group-addon" title="Periodo Lectivo">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                        <h6 class="form-control" *ngFor="let actual of periodoLectivoActual" title="Periodo Lectivo">
+                            {{actual.descripcion}}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10"></div>
+            <!-- Botones para finalizar y generar reporte !-->
+            <div class="col-lg-2">
+                <!-- Boton para cerrar el Plan Marco Formacion !-->
+                <button class="btn btn-success pull-right form-control"
+                        *ngIf="planRotacionTemporal.estado == 0 && entidadSeleccionada.idEstudiante!=0"
+                        (click)="bloquearPlanRotacion()">
+                    <i class="fa fa-check-square" aria-hidden="true"></i>
+                    Finalizar
+                </button>
+                <!-- Boton para generar reporte !-->
+                <button class="btn btn-primary pull-right form-control"
+                        *ngIf="planRotacionTemporal.estado == 1"
+                        (click)="bloquearPlanRotacion()">
+                    <i class="fa fa-print" aria-hidden="true"></i>
+                    Generar Plan
+                </button>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <!-- Grid !-->
+    <div *ngIf="!flag">
+        <!-- Titulo !-->
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <!-- Titulo izquierda !-->
+                <div class="form-group">
+                    <h3 name="tituloIzquierda" id="tituloIzquierda">
+                        Competencias Necesarias:
+                        <button class="btn btn-primary"
+                                (click)="guardarConocimientos(conocimientosPlanRotacion)">
+                            <i class="fa fa-save" aria-hidden="true"></i>
+                        </button>
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <!-- Competencias Necesarias !-->
+        <div class="row" style="margin-top:15px">
+            <div *ngIf="planRotacionTemporal.estado == 0;
+                                then mostrarConocimientos else bloquearConocimientos"></div>
+            <ng-template #mostrarConocimientos>
+                <!-- Conocimientos Teoricos !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" name="conocimientosTeoricos" id="conocimientosTeoricos"
+                                  placeholder="Conocimientos Teoricos"
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosTeoricos"></textarea>
+                        <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+
+                <!-- Conocimiento Procedimentales !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-cogs" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" name="conocimientosProcedimentales"
+                                  id="conocimientosProcedimentales"
+                                  placeholder="Conocimientos Procidementales"
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosProcedimentales"></textarea>
+                        <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+
+                <!-- Conocimiento Actitudianales !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-child" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" name="conocimientosActitudianales"
+                                  id="conocimientosActitudianales"
+                                  placeholder="Conocimientos Actitudinales"
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosActitudinales"></textarea>
+                        <span class="input-group-addon" title="Puede ingresar ...">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #bloquearConocimientos>
+                <!-- Conocimientos Teoricos !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" readonly
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosTeoricos"></textarea>
+                        <span class="input-group-addon" title="Conocimientos Teóricos">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+
+                <!-- Conocimiento Procedimentales !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-cogs" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" readonly
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosProcedimentales"></textarea>
+                        <span class="input-group-addon" title="Conocimientos Procedimentales">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+
+                <!-- Conocimiento Actitudianales !-->
+                <div class="col-lg-4 form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-child" aria-hidden="true"></i>
+                            </span>
+                        <textarea class="form-control" readonly
+                                  [(ngModel)]="conocimientosPlanRotacion.conocimientosActitudinales"></textarea>
+                        <span class="input-group-addon" title="Conocimientos Actitudinales">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </span>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+        <hr/>
+        <!-- Objetivos !-->
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <h3 name="tituloDerecha" id="tituloDerecha">
+                        Objetivos:
+                    </h3>
+                </div>
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="1%">
+                        </th>
+                        <th width="65%" scope="col">
+                            Objetivos
+                        </th>
+                        <th width="25%" scope="col">
+                            Puestos de Aprendizaje
+                        </th>
+                        <th width="5%" scope="col">
+                            Semana
+                        </th>
+                        <th width="5%">
+                            <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let actual of planRotacion" (click)="onSelect(actual)">
+                        <td>
+                            <i class="fa fa-hand-o-right" [hidden]="!estaSeleccionado(actual)"></i>
+                        </td>
+                        <td>
+                            <textarea class="form-control" readonly>{{actual.objetivo}}</textarea>
+                        </td>
+                        <td>
+                            <textarea class="form-control" readonly>{{actual.puestoAprendizaje}}</textarea>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado==0;
+                                then mostrarSemana else bloquearSemana"></div>
+                            <ng-template #mostrarSemana>
+                                <input type="number" min="1" max="20" [(ngModel)]="actual.semana"
+                                       class="form-control"/>
+                            </ng-template>
+                            <ng-template #bloquearSemana>
+                                <input type="number" class="form-control" readonly
+                                       value="{{actual.semana}}"/>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.estado==0;
+                            then mostrarBotones ">
+                            </div>
+                            <ng-template #mostrarBotones>
+                                <button class="btn btn-primary btn-sm"
+                                        (click)="guardarSemana(actual)">
+                                    <i class="fa fa-save" aria-hidden="true"></i>
+                                </button>
+                            </ng-template>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

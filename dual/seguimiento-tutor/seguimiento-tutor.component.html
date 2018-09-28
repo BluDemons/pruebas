@@ -1,0 +1,465 @@
+<div class="container-fluid">
+    <!-- Encabezado !-->
+    <div *ngIf="flag">
+        <div class="row">
+            <!-- Titulo !-->
+            <div class="col-lg-9">
+                <h2>Seguimiento Estudiantes:</h2>
+            </div>
+            <!-- Periodo Lectivo !-->
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <div class="input-group">
+                                            <span class="input-group-addon" title="Periodo Lectivo">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                        <h6 class="form-control" *ngFor="let actual of periodoLectivoActual"
+                            title="Periodo Lectivo">
+                            {{actual.descripcion}}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-lg-3" *ngFor="let estudiante of estudiantes">
+                <div class="thumbnail text-center table table-bordered">
+                    <img src="{{estudiante.srcFoto}}" width="150px" height="150px"
+                         class="btn">
+                    <div class="caption">
+                        <p class="btn btn-link">
+                            {{estudiante.apellidosEstudiante}}
+                            {{estudiante.nombresEstudiante}}
+                        </p>
+                        <h6>Informes de Aprendizaje</h6>
+                        <p>
+                            <button class="btn btn-danger"
+                                    (click)="openInformesAprendizaje(modalInformesAprendizaje,1,estudiante.idEstudiantes)">
+                                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                {{estudiante.prioridad1}}
+                            </button>
+                            <button class="btn btn-warning"
+                                    (click)="openInformesAprendizaje(modalInformesAprendizaje,2,estudiante.idEstudiantes)">
+                                <i class="fa fa-handshake-o" aria-hidden="true"></i>
+                                {{estudiante.prioridad2}}
+                            </button>
+                            <button class="btn btn-primary"
+                                    (click)="openInformesAprendizaje(modalInformesAprendizaje,3,estudiante.idEstudiantes)">
+                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                {{estudiante.prioridad3}}
+                            </button>
+                        </p>
+
+                        <h6>Planes de Formación</h6>
+                        <div *ngIf="estudiante.planMarcoFormacion==1 || estudiante.planMarcoFormacion==0;
+                            then mostrarPlanMarcoFormacion else bloquearPlanMarcoFormacion"></div>
+                        <ng-template #mostrarPlanMarcoFormacion>
+                            <button class="btn btn-secondary"
+                                    *ngIf="estudiante.planMarcoFormacion==0"
+                                    (click)="openPlanMarcoFormacion(modalPlanMarcoFormacion,estudiante.idEstudiantes)"
+                                    title="Plan Marco de Formacion">
+                                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-info"
+                                    *ngIf="estudiante.planMarcoFormacion==1"
+                                    (click)="openPlanMarcoFormacion(modalPlanMarcoFormacion,estudiante.idEstudiantes)"
+                                    title="Plan Marco de Formacion">
+                                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                        <ng-template #bloquearPlanMarcoFormacion>
+                            <button class="btn btn-secondary" disabled title="Plan Marco de Formacion">
+                                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                        <div *ngIf="estudiante.planRotacion==1 || estudiante.planRotacion==0;
+                            then mostrarPlanRotacion else bloquearPlanRotacion"></div>
+                        <ng-template #mostrarPlanRotacion>
+                            <button class="btn btn-secondary"
+                                    *ngIf="estudiante.planRotacion==0"
+                                    (click)="openPlanRotacion(modalPlanRotacion,estudiante.idEstudiantes)"
+                                    title="Plan de Rotacion">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-info"
+                                    *ngIf="estudiante.planRotacion==1"
+                                    (click)="openPlanRotacion(modalPlanRotacion,estudiante.idEstudiantes)"
+                                    title="Plan de Rotacion">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                        <ng-template #bloquearPlanRotacion>
+                            <button class="btn btn-secondary" disabled title="Plan de Rotacion">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                        <div *ngIf="estudiante.planProyectoEmpresarial==1 || estudiante.planProyectoEmpresarial==0;
+                            then mostrarPlanProyectoEmpresarial else bloquearPlanProyectoEmpresarial"></div>
+                        <ng-template #mostrarPlanProyectoEmpresarial>
+                            <button class="btn btn-secondary"
+                                    *ngIf="estudiante.planProyectoEmpresarial==0"
+                                    (click)="openPlanProyectoEmpresarial(modalPlanProyectoEmpresarial,estudiante.idEstudiantes)"
+                                    title="Proyecto Empresarial">
+                                <i class="fa fa-university" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-info"
+                                    *ngIf="estudiante.planProyectoEmpresarial==1"
+                                    (click)="openPlanProyectoEmpresarial(modalPlanProyectoEmpresarial,estudiante.idEstudiantes)"
+                                    title="Proyecto Empresarial">
+                                <i class="fa fa-university" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                        <ng-template #bloquearPlanProyectoEmpresarial>
+                            <button class="btn btn-secondary" disabled title="Proyecto Empresarial">
+                                <i class="fa fa-university" aria-hidden="true"></i>
+                            </button>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualizar Informes de Aprendizaje !-->
+    <ng-template #modalInformesAprendizaje let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Informes de Aprendizaje:
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body modal-lg">
+            <!-- Grid !-->
+            <div class="row" style="margin-top:15px">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">
+                     <span>
+                        <strong>Semana</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Calificación</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Reflexión</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Observaciones</strong>
+                     </span>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let actual of informesAprendizaje" (click)="onSelect(actual)"
+                            ngClass="table-danger: actual.prioridad === 2">
+                            <td width="15px">
+                                <input type="number" class="form-control" readonly
+                                       value="{{actual.semana}}"/>
+                            </td>
+                            <td width="15px">
+                                <input type="number" class="form-control" readonly
+                                       value="{{actual.calificacion}}"/>
+                            </td>
+                            <td>
+                                <textarea class="form-control" readonly>{{actual.reflexion}}</textarea>
+                            </td>
+                            <td>
+                                <textarea class="form-control" readonly>{{actual.observaciones}}</textarea>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!--<div class="modal-footer"></div>!-->
+    </ng-template>
+
+    <!-- Visualizar Plan Marco de Formacion !-->
+    <ng-template #modalPlanMarcoFormacion let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Plan Marco de Formación:
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body modal-lg">
+            <!-- Grid !-->
+            <div class="row" style="margin-top:15px">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">
+                     <span>
+                        <strong>Objetivos</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Nivel del Logro Esperado</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Tareas</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Puesto de Aprendizaje</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                                Semanas de Trabajo
+                            </th>
+                            <th scope="col">
+                                Responsable
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let actual of planMarcoFormacion" (click)="onSelect(actual)"
+                            ngClass="table-danger: actual.prioridad === 2">
+                            <td width="350px">
+                                <textarea class="form-control" readonly>{{actual.objetivo}}</textarea>
+                            </td>
+                            <td width="15px">
+                                <input type="number" class="form-control" readonly
+                                       value="{{actual.nivelLogroEsperado}}"/>
+                            </td>
+                            <td width="300px">
+                                <textarea class="form-control" readonly>{{actual.tareas}}</textarea>
+                            </td>
+                            <td width="350px">
+                                            <textarea class="form-control"
+                                                      readonly>{{actual.puestoAprendizaje}}</textarea>
+                            </td>
+                            <td width="50px">
+                                <input type="number" class="form-control" readonly
+                                       value="{{actual.semanasTrabajo}}"/>
+                            </td>
+                            <td width="50px">
+                                <textarea class="form-control" readonly>{{actual.responsable}}</textarea>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!--<div class="modal-footer"></div>!-->
+    </ng-template>
+
+    <!-- Visualizar Plan de Rotacion !-->
+    <ng-template #modalPlanRotacion let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Plan de Rotación:
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body modal-lg">
+            <!-- Grid !-->
+            <div class="row" style="margin-top:15px">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">
+                     <span>
+                        <strong>Objetivos</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                     <span>
+                        <strong>Puesto de Aprendizaje</strong>
+                     </span>
+                            </th>
+                            <th scope="col">
+                                Semana
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let actual of planRotacion" (click)="onSelect(actual)"
+                            ngClass="table-danger: actual.prioridad === 2">
+                            <td width="450px">
+                                <textarea class="form-control" readonly>{{actual.objetivo}}</textarea>
+                            </td>
+                            <td width="50px">
+                                <input class="form-control" readonly
+                                       value="{{actual.puestoAprendizaje}}"/>
+                            </td>
+                            <td width="15px">
+                                <textarea class="form-control" readonly>{{actual.semana}}</textarea>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!--<div class="modal-footer"></div>!-->
+    </ng-template>
+
+    <!-- Visualizar Plan Proyecto Empresarial!-->
+    <ng-template #modalPlanProyectoEmpresarial let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Plan de Proyecto Empresarial:
+            </h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('ClickEnX')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body modal-lg">
+            <div class="row" *ngFor="let actual of planProyectoEmpresarial">
+                <div class="col-lg-12">
+                    <!-- Titulo !-->
+                    <div class="form-group row">
+                        <label for="editTitulo" class="col-lg-4 col-form-label">
+                            Título:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editTitulo" id="editTitulo" readonly
+                                      [(ngModel)]="actual.titulo">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Analisis !-->
+                    <div class="form-group row">
+                        <label for="editAnalisis" class="col-lg-4 col-form-label">
+                            Análisis:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editAnalisis"
+                                      id="editAnalisis" readonly
+                                      [(ngModel)]="actual.analisis">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Objetivo !-->
+                    <div class="form-group row">
+                        <label for="editObjetivo" class="col-lg-4 col-form-label">
+                            Objetivo:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editNombreTutorGeneral"
+                                      id="editObjetivo" readonly
+                                      [(ngModel)]="actual.objetivo">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Descripcion !-->
+                    <div class="form-group row">
+                        <label for="editDescripcion" class="col-lg-4 col-form-label">
+                            Descripción:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editDescripcion"
+                                      id="editDescripcion" readonly
+                                      [(ngModel)]="actual.descripcion">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Descripcion Indicador !-->
+                    <div class="form-group row">
+                        <label for="editIndicador" class="col-lg-4 col-form-label">
+                            Indicador:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editIndicador"
+                                      id="editIndicador" readonly
+                                      [(ngModel)]="actual.indicador">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Medicion !-->
+                    <div class="form-group row">
+                        <div class="col-lg-4 col-form-label">
+                            <label for="editMedicion">
+                                Medición:
+                            </label>
+                        </div>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editMedicion" id="editMedicion" readonly
+                                      [(ngModel)]="actual.medicion">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Meta !-->
+                    <div class="form-group row">
+                        <label for="editMeta" class="col-lg-4 col-form-label">
+                            Meta:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editMeta" id="editMeta" readonly
+                                      [(ngModel)]="actual.meta">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Fuente Datos !-->
+                    <div class="form-group row">
+                        <label for="editFuenteDatos" class="col-lg-4 col-form-label">
+                            Fuente Datos:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" name="editFuenteDatos" id="editFuenteDatos" readonly
+                                      [(ngModel)]="actual.fuenteDatos">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Beneficios Esperados !-->
+                    <div class="form-group row">
+                        <label for="editBenificiosEsperados" class="col-lg-4 col-form-label">
+                            Beneficios esperados:
+                        </label>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" type="number" min="1" name="editBenificiosEsperados"
+                                      id="editBenificiosEsperados" readonly
+                                      [(ngModel)]="actual.beneficiosEsperados">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <!-- Presupuesto !-->
+                    <div class="form-group row">
+                        <label for="editPresupuesto" class="col-lg-4 col-form-label">
+                            Presupuesto:
+                        </label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="number" min="1" name="editPresupuesto"
+                                   readonly
+                                   id="editPresupuesto" [(ngModel)]="actual.presupuesto"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--<div class="modal-footer"></div>!-->
+    </ng-template>
+</div>

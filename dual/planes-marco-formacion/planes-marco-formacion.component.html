@@ -1,0 +1,292 @@
+<div class="container-fluid">
+    <!-- Encabezado !-->
+    <div class="row">
+        <!-- Nombre del Modulo !-->
+        <div class="col-lg-4">
+            <h2>Plan Marco de Formación:</h2>
+        </div>
+        <!-- Lista de Estudiantes !-->
+        <div class="col-lg-5">
+            <div class="form-group">
+                <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </span>
+                    <select class="form-control" name="editEstudiante" id="editEstudiante"
+                            [(ngModel)]="entidadSeleccionada.idEstudiante"
+                            (click)="getPlanMarcoFormacionPorEstudiante(entidadSeleccionada.idEstudiante)">
+                        <option value="0">
+                            Seleccione Estudiante
+                        </option>
+                        <option *ngFor="let estudiante of estudiantes"
+                                value="{{estudiante.idEstudiante}}">
+                            {{estudiante.apellidosEstudiante}} {{estudiante.nombresEstudiante}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- Periodo Lectivo !-->
+        <div class="col-lg-3">
+            <div class="form-group">
+                <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                    <h6 class="form-control" *ngFor="let actual of periodoLectivoActual">
+                        {{actual.descripcion}}
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SubMenu !-->
+    <div class="row">
+        <div class="col-lg-10"></div>
+        <!-- Botones para finalizar y generar reporte !-->
+        <div class="col-lg-2">
+            <!-- Boton para cerrar el Plan Marco Formacion !-->
+            <button class="btn btn-primary pull-right form-control"
+                    *ngIf="planMarcoFormacionTemporal.estado==1 || planMarcoFormacionTemporal.estado==2"
+                    (click)="generarPDFPlanMarcoFormacion()">
+                <i class="fa fa-print" aria-hidden="true"></i>
+                Generar Plan
+            </button>
+            <!-- Boton para generar reporte !-->
+            <button class="btn btn-success pull-right form-control"
+                    *ngIf="planMarcoFormacionTemporal.estado==0 && entidadSeleccionada.idEstudiante!=0 && planMarcoFormacion!=null"
+                    (click)="bloquearPlanMarcoFormacion()">
+                <i class="fa fa-check-square" aria-hidden="true"></i>
+                Finalizar
+            </button>
+        </div>
+    </div>
+    <hr/>
+    <div #cuerpoPlanMarcoFormacion>
+        <!-- Grid !-->
+        <div *ngIf="!flag">
+            <div class="row" style="margin-top:15px">
+                <div class="col-lg-12">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-dark">
+                        <tr>
+                            <!-- Seleccion !-->
+                            <th width="1%">
+                            </th>
+                            <!-- Objetivos !-->
+                            <th width="25%" scope="col">
+                                Objetivos
+                            </th>
+                            <!-- Nivel de logro esperado !-->
+                            <th width="5%" scope="col">
+                                Nivel de Logro Esperado
+                            </th>
+                            <!-- Nivel de logro Alcanzado !-->
+                            <th width="5%" scope="col">
+                                Nivel de Logro Alcanzado
+                            </th>
+                            <!-- Tareas !-->
+                            <th width="25%" scope="col">
+                                Tareas
+                            </th>
+                            <!-- Puesto de aprendizaje !-->
+                            <th width="10%" scope="col">
+                                Puesto de Aprendizaje
+                            </th>
+                            <!-- Semanas de trabajo !-->
+                            <th width="5%" scope="col">
+                                Semanas de Trabajo
+                            </th>
+                            <!-- Responsable !-->
+                            <th width="15%" scope="col">
+                                Responsable
+                            </th>
+                            <!-- Opciones !-->
+                            <th width="10%" scope="col" class="text-center">
+                                <i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Para ingresar un nuevo objetivo !-->
+                        <tr *ngIf="entidadSeleccionada.idEstudiante!=0 && planMarcoFormacionTemporal.estado==0">
+                            
+                            <td>
+                                <textarea class="form-control" [(ngModel)]="entidadObjetivo.descripcion"
+                                          placeholder="Ingrese el nuevo objetivo"></textarea>
+                            </td>
+                            <td>
+                                <input type="number" min="1" max="4" class="form-control"
+                                       [(ngModel)]="entidadObjetivo.nivelLogroEsperado"/>
+                            </td>
+                            <td></td>
+                            <td>
+                                <textarea class="form-control" [(ngModel)]="entidadObjetivo.tareas"></textarea>
+                            </td>
+                            <td>
+                                <textarea class="form-control"
+                                          [(ngModel)]="entidadObjetivo.puestoAprendizaje"></textarea>
+                            </td>
+                            <td>
+                                <input type="number" min="1" max="20" class="form-control"
+                                       [(ngModel)]="entidadObjetivo.semanasTrabajo"/>
+                            </td>
+                            <td>
+                                <textarea class="form-control" [(ngModel)]="entidadObjetivo.responsable"></textarea>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"
+                                        (click)="guardarObjetivo(entidadObjetivo,entidadSeleccionada.idEstudiante)">
+                                    <i class="fa fa-save fa-2x" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Para modificar o eliminar un objetivo !-->
+                        <tr *ngFor="let actual of planMarcoFormacion" (click)="onSelect(actual)"
+                            class="table-active">
+                            <td>
+                                <i class="fa fa-hand-o-right" [hidden]="!estaSeleccionado(actual)"></i>
+                            </td>
+                            <!-- Objerivos !-->
+                            <td>
+                                <div *ngIf="actual.prioridad==0;
+                                then mostrarObjetivo else ocultarObjetivo"></div>
+                                <ng-template #mostrarObjetivo>
+                                    <textarea type="text" [(ngModel)]="actual.descripcion"
+                                              class="form-control"></textarea>
+                                </ng-template>
+                                <ng-template #ocultarObjetivo>
+                                                <textarea class="form-control"
+                                                          readonly>{{actual.descripcion}}</textarea>
+                                </ng-template>
+                            </td>
+
+                            <!-- Nivel Logro Esperado !-->
+                            <td>
+                                <div *ngIf="actual.prioridad==0;
+                                then mostrarNivelLogroEsperado else ocultarNivelLogroEsperado"></div>
+                                <ng-template #mostrarNivelLogroEsperado>
+                                    <input type="number" min="1" max="4"
+                                           [(ngModel)]="actual.nivelLogroEsperado"
+                                           class="form-control"/>
+                                </ng-template>
+                                <ng-template #ocultarNivelLogroEsperado>
+                                    <input type="number" class="form-control" readonly
+                                           value="{{actual.nivelLogroEsperado}}"/>
+                                </ng-template>
+                            </td>
+
+                            <!-- Nivel Logro Alcanzado!-->
+                            <td>
+                                <div *ngIf="actual.prioridadObjetivo ==0;
+                                then mostrarNivelLogroAlcanzado else ocultarNivelLogroAlcanzado"></div>
+                                <ng-template #mostrarNivelLogroAlcanzado>
+                                    <input type="number" min="1" max="4"
+                                           [(ngModel)]="actual.nivelLogroAlcanzado"
+                                           class="form-control"/>
+                                </ng-template>
+                                <ng-template #ocultarNivelLogroAlcanzado>
+                                    <input type="number" class="form-control" readonly
+                                           value="{{actual.nivelLogroAlcanzado}}"/>
+                                </ng-template>
+                            </td>
+
+                            <!-- Tareas !-->
+                            <td>
+                                <div *ngIf="actual.prioridad==0;
+                                then mostrarTareas else bloquearTareas"></div>
+                                <ng-template #mostrarTareas>
+                                    <textarea [(ngModel)]="actual.tareas"
+                                              class="form-control"></textarea>
+                                </ng-template>
+                                <ng-template #bloquearTareas>
+                                    <textarea class="form-control" readonly>{{actual.tareas}}</textarea>
+                                </ng-template>
+                            </td>
+
+                            <!-- Puesto Aprendizaje!-->
+                            <td>
+                                <div
+                                    *ngIf="actual.prioridad==0;
+                                then mostrarPuestoAprendizaje else bloquearPuestoAprendizaje"></div>
+                                <ng-template #mostrarPuestoAprendizaje>
+                                    <textarea [(ngModel)]="actual.puestoAprendizaje"
+                                              class="form-control"></textarea>
+                                </ng-template>
+                                <ng-template #bloquearPuestoAprendizaje>
+                                            <textarea class="form-control"
+                                                      readonly>{{actual.puestoAprendizaje}}</textarea>
+                                </ng-template>
+                            </td>
+
+                            <!-- Semanas Trabajo !-->
+                            <td>
+                                <div
+                                    *ngIf="actual.prioridad==0;
+                                then mostrarSemanastrabajo else bloquearSemanasTrabajo"></div>
+                                <ng-template #mostrarSemanastrabajo>
+                                    <input type="number" min="1" max="20"
+                                           [(ngModel)]="actual.semanasTrabajo"
+                                           class="form-control"/>
+                                </ng-template>
+                                <ng-template #bloquearSemanasTrabajo>
+                                    <input type="number" class="form-control" readonly
+                                           value="{{actual.semanasTrabajo}}"/>
+                                </ng-template>
+                            </td>
+
+                            <!-- Responsable !-->
+                            <td width="50px">
+                                <div *ngIf="actual.prioridad==0;
+                                then mostrarResponsable else bloquearResponsable"></div>
+                                <ng-template #mostrarResponsable>
+                                    <textarea type="text" [(ngModel)]="actual.responsable"
+                                              class="form-control"></textarea>
+                                </ng-template>
+                                <ng-template #bloquearResponsable>
+                                                <textarea class="form-control"
+                                                          readonly>{{actual.responsable}}</textarea>
+                                </ng-template>
+                            </td>
+
+                            <!-- Botones !-->
+                            <td>
+                                <div
+                                    *ngIf="actual.prioridadObjetivo==0;
+                                then mostrarBotones else bloquearBotones"></div>
+                                <ng-template #mostrarBotones>
+                                    <button class="btn btn-primary btn-sm "
+                                            (click)="actualizarObjetivo(actual)">
+                                        <i class="fa fa-save" aria-hidden="true"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger"
+                                            (click)="borrarObjetivo(actual)">
+                                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                    </button>
+                                </ng-template>
+
+                                <div *ngIf="actual.prioridad==-1;
+                                then mostrarBotones else bloquearBotones"></div>
+                                <ng-template #mostrarBotones>
+                                    <button class="btn btn-primary btn-sm "
+                                            (click)="actualizarNivelLogroAlcanzado(actual)">
+                                        <i class="fa fa-save" aria-hidden="true"></i>
+                                    </button>
+                                </ng-template>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div #encabezadoPlanMarcoFormacion>
+
+        </div>
+        <div #piePlanMarcoFormacion>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,230 @@
+<div class="container-fluid">
+    <!-- Pantalla Principal !-->
+    <div>
+        <!-- Encabezado !-->
+        <div class="row">
+            <div class="col-lg-4">
+                <h2>
+                    {{titulo}}
+                    <button type="button" class="btn btn-secondary"
+                            *ngIf="!flag" (click)="cambiarFlag('regresar')">
+                        <span class="fa fa-arrow-circle-left"></span>&nbsp;Regresar
+                    </button>
+                </h2>
+            </div>
+            <!-- Seleccion Estudiante !-->
+            <div class="col-lg-5">
+                <div *ngIf="!flag" class="form-group">
+                    <div class="input-group">
+                        <label for="numeroSemana" class="form-control">
+                            Semana:
+                        </label>
+                        <input type="number" id="numeroSemana" class="form-control"
+                               value="{{numeroSemana}}" disabled>
+                    </div>
+                </div>
+                <div *ngIf="flag" class="form-group">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </span>
+                        <select class="form-control" name="editEstudiante" id="editEstudiante"
+                                [(ngModel)]="entidadSeleccionada.idEstudiante"
+                                (click)="getInformesAprendizajePorEstudiante(entidadSeleccionada.idEstudiante)">
+                            <option value="0">
+                                Seleccione Estudiante
+                            </option>
+                            <option *ngFor="let estudiante of estudiantes"
+                                    value="{{estudiante.idEstudiante}}">
+                                {{estudiante.apellidosEstudiante}} {{estudiante.nombresEstudiante}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Periodo Lectivo !-->
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                        <h6 class="form-control" *ngFor="let actual of periodoLectivoActual">
+                            {{actual.descripcion}}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <!-- Grid Informes de Aprendizaje!-->
+        <div *ngIf="flag" class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="1%">
+                        </th>
+                        <th width="5%" scope="col">
+                            Semana
+                        </th>
+                        <th width="10%" scope="col">
+                            Fecha Entrega
+                        </th>
+                        <th width="5%" scope="col">
+                            Calificación
+                        </th>
+                        <th width="25%" scope="col">
+                            Observaciones
+                        </th>
+                        <th width="25%" scope="col">
+                            Reflexión
+                        </th>
+                        <th width="15%" scope="col">
+                            Evaluación
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let actual of informesAprendizaje" (click)="onSelect(actual)"
+                        ngClass="table-danger: actual.prioridad === 2">
+                        <td>
+                            {{actual.semana}}
+                        </td>
+                        <td>
+                            <input type="datetime-local" value="{{actual.fechaEntrega}}"
+                                   class="form-control" readonly>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.prioridad==-1 || actual.prioridad==0;
+                                then mostrarCalificacion else ocultarCalificacion"></div>
+                            <ng-template #mostrarCalificacion>
+                                <input type="number" min="0" max="100" [(ngModel)]="actual.calificacion"
+                                       class="form-control"/>
+                            </ng-template>
+                            <ng-template #ocultarCalificacion>
+                                {{actual.calificacion}}
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="actual.prioridad==-1 || actual.prioridad==0;
+                                then mostrarObservaciones else bloquearObservaciones"></div>
+                            <ng-template #mostrarObservaciones>
+                                    <textarea type="text" [(ngModel)]="actual.observaciones"
+                                              class="form-control"></textarea>
+                            </ng-template>
+                            <ng-template #bloquearObservaciones>
+                                <textarea class="form-control" readonly>{{actual.observaciones}}</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div
+                                *ngIf="actual.prioridad==-1 || actual.prioridad==0;
+                                then mostrarReflexion else bloquearReflexion"></div>
+                            <ng-template #mostrarReflexion>
+                                    <textarea [(ngModel)]="actual.reflexion"
+                                              class="form-control"></textarea>
+                            </ng-template>
+                            <ng-template #bloquearReflexion>
+                                <textarea class="form-control" readonly>{{actual.reflexion}}</textarea>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf=" actual.prioridad==-1|| actual.prioridad==0">
+                                <button class="btn btn-info btn-sm"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);cambiarFlag('ver')">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-primary btn-sm" (click)="guardarCalificacion(actual,3)">
+                                    <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" (click)="guardarCalificacion(actual,2)">
+                                    <i class="fa fa-handshake-o" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="guardarCalificacion(actual,1)">
+                                    <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div *ngIf=" actual.prioridad==3">
+                                <button class="btn btn-info btn-sm"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);cambiarFlag('ver')">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-primary btn-sm" disabled>
+                                    <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div *ngIf=" actual.prioridad==2">
+                                <button class="btn btn-info btn-sm"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);cambiarFlag('ver')">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" disabled>
+                                    <i class="fa fa-handshake-o" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div *ngIf=" actual.prioridad==1">
+                                <button class="btn btn-info btn-sm"
+                                        (click)="getActividadesPorInformeAprendizaje(actual.id);cambiarFlag('ver')">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" disabled>
+                                    <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Grid Actividades !-->
+    <div *ngIf="!flag">
+        <div class="row" style="margin-top:15px">
+            <div class="col-lg-12">
+                <table class="table table-hover table-bordered">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th width="15%" scope="col">
+                            Fecha
+                        </th>
+                        <th width="60%" scope="col">
+                            Actividades
+                        </th>
+                        <th width="10%" scope="col">
+                            Hora Ingreso
+                        </th>
+                        <th width="10%" scope="col">
+                            Hora Salida
+                        </th>
+                        <th width="5%" scope="col">
+                            Horas Totales
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Para mostrar las actividades creadas !-->
+                    <tr *ngFor="let actual of actividadesInformeAprendizaje">
+                        <td>
+                            <input type="text" class="form-control" readonly value="{{actual.fecha}}"/>
+                        </td>
+                        <td>
+                            <textarea class="form-control" readonly>{{actual.descripcion}}</textarea>
+                        </td>
+                        <td>
+                            <input type="time" class="form-control" readonly value="{{actual.horaIngreso}}">
+                        </td>
+                        <td>
+                            <input type="time" class="form-control" readonly value="{{actual.horaSalida}}">
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" readonly value="{{actual.horasTotales}}"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
